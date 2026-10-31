@@ -1,0 +1,396 @@
+<title>Απατεώνας</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="theme-color" content="#0e2536">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;700&family=Noto+Serif+Display:ital,wght@0,800;1,800&display=swap">
+<style>
+/* Layout: one-screen party app, single column, big thumb-sized controls; deliberate single dark look (Aegean night) */
+:root {
+  --bg: #0e2536;
+  --surface: #17384f;
+  --surface-2: #1f4863;
+  --fg: #eef4f7;
+  --muted: #93b2c4;
+  --accent: #f2c14e;
+  --accent-ink: #2a1f05;
+  --danger: #ef5a5f;
+  --font-display: "Noto Serif Display", Georgia, "Times New Roman", serif;
+  --font-body: "Commissioner", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --radius: 14px;
+  color-scheme: dark;
+}
+html, body { height: 100%; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.45;
+  -webkit-tap-highlight-color: transparent;
+}
+#app {
+  min-height: 100%;
+  box-sizing: border-box;
+  max-width: 520px;
+  margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 20px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+h1, h2 { font-family: var(--font-display); font-weight: 800; margin: 0; text-wrap: balance; line-height: 1.1; }
+h1 { font-size: 2.4rem; }
+h1 em { color: var(--accent); }
+h2 { font-size: 1.6rem; }
+p { margin: 0; }
+.muted { color: var(--muted); }
+.label { font-size: .78rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+.section { display: flex; flex-direction: column; gap: 10px; }
+.spacer { flex: 1; }
+
+button { font: inherit; color: inherit; cursor: pointer; border: 0; }
+button:focus-visible, input:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+button:disabled { opacity: .4; cursor: not-allowed; }
+
+.btn {
+  min-height: 56px; padding: 0 20px; border-radius: var(--radius);
+  font-weight: 700; font-size: 1.05rem;
+  background: var(--surface-2);
+}
+.btn.primary { background: var(--accent); color: var(--accent-ink); }
+.btn.danger { background: var(--danger); color: #fff; }
+.btn.ghost { background: transparent; color: var(--muted); min-height: 44px; }
+.stack { display: flex; flex-direction: column; gap: 10px; }
+
+.add-row { display: flex; gap: 8px; }
+.add-row input {
+  flex: 1; min-width: 0; min-height: 52px; box-sizing: border-box;
+  padding: 0 14px; border-radius: var(--radius);
+  border: 2px solid var(--surface-2); background: var(--surface); color: var(--fg);
+  font: inherit;
+}
+.add-row input::placeholder { color: var(--muted); }
+.add-row .btn { min-height: 52px; }
+
+.players { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.players li {
+  display: flex; align-items: center; gap: 4px;
+  background: var(--surface); border-radius: 999px; padding: 4px 4px 4px 14px;
+  font-weight: 500; min-width: 0;
+}
+.players li span { overflow-wrap: anywhere; }
+.players li button {
+  width: 34px; height: 34px; border-radius: 50%; background: transparent; color: var(--muted); font-size: 1.2rem; line-height: 1;
+}
+
+.seg { display: grid; grid-template-columns: 1fr 1fr; background: var(--surface); border-radius: var(--radius); padding: 4px; gap: 4px; }
+.seg button { min-height: 46px; border-radius: 10px; background: transparent; font-weight: 700; color: var(--muted); }
+.seg button[aria-pressed="true"] { background: var(--surface-2); color: var(--fg); }
+
+.stepper { display: flex; align-items: center; justify-content: space-between; gap: 12px; background: var(--surface); border-radius: var(--radius); padding: 8px 8px 8px 16px; }
+.stepper .ctrl { display: flex; align-items: center; gap: 6px; }
+.stepper .ctrl button { width: 48px; height: 48px; border-radius: 12px; background: var(--surface-2); font-size: 1.5rem; font-weight: 700; }
+.stepper output { min-width: 2ch; text-align: center; font-size: 1.5rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+.names { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.names button {
+  min-height: 72px; padding: 10px; border-radius: var(--radius);
+  background: var(--surface-2); font-weight: 700; font-size: 1.1rem; overflow-wrap: anywhere;
+}
+.names button.seen { background: transparent; border: 2px dashed var(--surface-2); color: var(--muted); font-weight: 500; }
+.names button.seen::after { content: " ✓"; }
+
+.card {
+  flex: 1; min-height: 320px; border-radius: 22px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+  text-align: center; padding: 28px 20px;
+  background: var(--surface); border: 2px solid var(--surface-2);
+}
+.card.cover { background: repeating-linear-gradient(135deg, var(--surface) 0 18px, var(--surface-2) 18px 36px); }
+.card .word { font-family: var(--font-display); font-size: clamp(2.2rem, 11vw, 3.4rem); line-height: 1.05; overflow-wrap: anywhere; color: var(--accent); }
+.card.imposter { border-color: var(--danger); }
+.card.imposter .word { color: var(--danger); font-size: clamp(2rem, 10vw, 3rem); }
+.big-name { font-family: var(--font-display); font-size: 2.2rem; color: var(--accent); overflow-wrap: anywhere; }
+
+.result { background: var(--surface); border-radius: var(--radius); padding: 16px; display: flex; flex-direction: column; gap: 6px; }
+.result .value { font-family: var(--font-display); font-size: 1.8rem; overflow-wrap: anywhere; }
+.result.bad .value { color: var(--danger); }
+.result.good .value { color: var(--accent); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .card.revealed { animation: flip .28s ease-out; }
+  @keyframes flip { from { transform: rotateY(70deg); opacity: .2; } to { transform: none; opacity: 1; } }
+}
+</style>
+
+<div id="app"></div>
+
+<script>
+const WORDS = [
+  // Φαγητό & ποτό
+  "φραπές","freddo espresso","μπουγάτσα","κουλούρι Θεσσαλονίκης","σουβλάκι καλαμάκι","γύρος πίτα","πατσάς","κοκορέτσι","μαγειρίτσα","τσουρέκι",
+  "βασιλόπιτα","λουκουμάδες","τσίπουρο","ούζο","ρετσίνα","πασατέμπος","ΙΟΝ αμυγδάλου","μπλε Fanta","τζατζίκι","φασολάδα",
+  "μελομακάρονα","κουραμπιέδες","γεμιστά","παστίτσιο","χταπόδι στα κάρβουνα","ντάκος","σουτζουκάκια","τυρόπιτα",
+  // Μέρη
+  "μπουζούκια","πανηγύρι","καφενείο","τσιπουράδικο","περίπτερο","λαϊκή αγορά","ΚΕΠ","εφορία","ΚΤΕΛ","θερινό σινεμά",
+  "beach bar","Μύκονος","Σαντορίνη","Μοναστηράκι","Γκάζι","Εξάρχεια","Λευκός Πύργος","Καμάρα","Ακρόπολη","Αττική Οδός",
+  "Κηφισός","λιμάνι του Πειραιά","φέρι μποτ","Μετέωρα","Χαλκιδική","Σύνταγμα","Ομόνοια","ΟΑΚΑ","Ζάππειο",
+  // Ελληνικές καταστάσεις
+  "Πανελλήνιες","φροντιστήριο","θητεία","σκοπιά","ονομαστική γιορτή","κουμπάρος","μπατζανάκης","θεία από την Αμερική","παντόφλα της μάνας","ξεμάτιασμα",
+  "μάτι φυλαχτό","κομπολόι","φουστανέλα","τσολιάς","θερμοσίφωνας","ηλιακός","φακελάκι","ρουσφέτι","δημόσιος υπάλληλος","καμάκι",
+  "τουρίστας με κάλτσες και σανδάλια","σαγιονάρα","τέντα στο μπαλκόνι","κλιματιστικό","κουνιάδος","ταξιτζής","συρτάκι","ζεϊμπέκικο","σπάσιμο πιάτων","κορνάρισμα",
+  // Γιορτές
+  "Τσικνοπέμπτη","Καθαρά Δευτέρα","χαρταετός","Απόκριες","κάλαντα","φλουρί","Επιτάφιος","Ανάσταση","τσούγκρισμα αυγών","σούβλα του Πάσχα",
+  "Δεκαπενταύγουστος","γάμος στο χωριό","βάφτιση","κουφέτα",
+  // Πρόσωπα
+  "Γιάννης Αντετοκούνμπο","Ρεχάγκελ","Σάκης Ρουβάς","Έλενα Παπαρίζου","Άννα Βίσση","Νότης Σφακιανάκης","Λευτέρης Πανταζής","Πάολα","Μαζωνάκης","Πλούταρχος",
+  "Θανάσης Βέγγος","Ρένα Βλαχοπούλου","Αλίκη Βουγιουκλάκη","Κώστας Χατζηχρήστος","Χάρρυ Κλυνν","Λάκης Λαζόπουλος","Ελένη Μενεγάκη","Χαρδαβέλλας","Αρκάς","Καραγκιόζης",
+  "Μαρινέλλα","Τόλης Βοσκόπουλος","Σταμάτης Γονίδης","Καίτη Γαρμπή","Μιχάλης Χατζηγιάννης",
+  // TV, σινεμά, αθλητικά
+  "Euro 2004","Eurovision","My Number One","Survivor","Big Brother","MasterChef","Ρουκ Ζουκ","Τροχός της Τύχης","Λάμψη","Καλημέρα Ζωή",
+  "Παρά Πέντε","Κωνσταντίνου και Ελένης","Το Καφέ της Χαράς","Δύο Ξένοι","Είσαι το ταίρι μου","Λούφα και Παραλλαγή","Safe Sex","Ελληνοφρένεια","Ράδιο Αρβύλα","Fame Story",
+  "Ολυμπιακός","Παναθηναϊκός","ΠΑΟΚ","ΑΕΚ","ντέρμπι","ΟΠΑΠ δελτίο","Ολυμπιακοί Αγώνες 2004",
+  // Μυθολογία
+  "Δίας","Ηρακλής","Οδυσσέας","Δούρειος Ίππος","Μέδουσα","Μινώταυρος","Αχιλλέας","Κύκλωπας"
+];
+
+const STORE_KEY = "imposter-gr-v1";
+const app = document.getElementById("app");
+
+let state = load() || { players: [], mode: "fixed", fixed: 1, max: 2, used: [], round: null };
+let ui = { screen: state.round ? (state.round.done ? "end" : "pass") : "setup", current: null, revealed: false, armed: null };
+
+function load() {
+  try { return JSON.parse(localStorage.getItem(STORE_KEY)); } catch { return null; }
+}
+function save() {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch {}
+}
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+function rand(n) { return Math.floor(Math.random() * n); }
+function maxImposters() { return Math.max(1, state.players.length - 1); }
+function clampSettings() {
+  const m = maxImposters();
+  state.fixed = Math.min(Math.max(1, state.fixed), m);
+  state.max = Math.min(Math.max(1, state.max), m);
+}
+
+function pickWord() {
+  let pool = WORDS.filter(w => !state.used.includes(w));
+  if (!pool.length) { state.used = []; pool = WORDS.slice(); }
+  const w = pool[rand(pool.length)];
+  state.used.push(w);
+  return w;
+}
+
+function startRound() {
+  clampSettings();
+  const n = state.players.length;
+  const count = state.mode === "fixed" ? state.fixed : 1 + rand(state.max);
+  const idx = [...Array(n).keys()];
+  for (let i = n - 1; i > 0; i--) { const j = rand(i + 1); [idx[i], idx[j]] = [idx[j], idx[i]]; }
+  state.round = {
+    word: pickWord(),
+    imposters: idx.slice(0, count),
+    seen: Array(n).fill(false),
+    starter: rand(n),
+    done: false
+  };
+  save();
+  go("pass");
+}
+
+function go(screen, extra = {}) {
+  ui = { screen, current: null, revealed: false, armed: null, ...extra };
+  render();
+  window.scrollTo(0, 0);
+}
+
+function render() {
+  app.innerHTML = { setup: setupView, pass: passView, reveal: revealView, end: endView }[ui.screen]();
+  if (ui.screen === "setup") {
+    const input = document.getElementById("name-input");
+    if (input && ui.focusInput) input.focus();
+  }
+}
+
+function setupView() {
+  const n = state.players.length;
+  clampSettings();
+  const canStart = n >= 3;
+  const value = state.mode === "fixed" ? state.fixed : state.max;
+  return `
+    <header class="stack">
+      <h1>Ποιος είναι ο <em>απατεώνας</em>;</h1>
+      <p class="muted">Όλοι παίρνουν την ίδια λέξη, εκτός από τους απατεώνες. Βρείτε τους πριν σας καταλάβουν.</p>
+    </header>
+
+    <section class="section">
+      <div class="label">Παίκτες · ${n}</div>
+      <form class="add-row" data-action="add">
+        <input id="name-input" name="name" placeholder="Όνομα παίκτη" autocomplete="off" maxlength="24" enterkeyhint="done">
+        <button class="btn primary" type="submit">Προσθήκη</button>
+      </form>
+      ${n ? `<ul class="players">${state.players.map((p, i) => `
+        <li><span>${esc(p)}</span><button data-action="remove" data-i="${i}" aria-label="Αφαίρεση ${esc(p)}">×</button></li>`).join("")}
+      </ul>` : `<p class="muted">Πρόσθεσε τουλάχιστον 3 παίκτες.</p>`}
+    </section>
+
+    <section class="section">
+      <div class="label">Απατεώνες</div>
+      <div class="seg" role="group">
+        <button data-action="mode" data-mode="fixed" aria-pressed="${state.mode === "fixed"}">Σταθερός αριθμός</button>
+        <button data-action="mode" data-mode="random" aria-pressed="${state.mode === "random"}">Τυχαίος</button>
+      </div>
+      <div class="stepper">
+        <span>${state.mode === "fixed" ? "Πόσοι απατεώνες" : "Μέχρι πόσοι"}</span>
+        <div class="ctrl">
+          <button data-action="step" data-d="-1" aria-label="Λιγότεροι" ${value <= 1 ? "disabled" : ""}>−</button>
+          <output>${value}</output>
+          <button data-action="step" data-d="1" aria-label="Περισσότεροι" ${value >= maxImposters() ? "disabled" : ""}>+</button>
+        </div>
+      </div>
+      <p class="muted">${state.mode === "fixed"
+        ? "Όλοι ξέρουν πόσοι είναι οι απατεώνες."
+        : `Κάθε γύρος έχει από 1 έως ${value} απατεώνες. Κανείς δεν ξέρει πόσους.`}</p>
+    </section>
+
+    <div class="spacer"></div>
+    <button class="btn primary" data-action="start" ${canStart ? "" : "disabled"}>Ξεκίνα τον γύρο</button>
+  `;
+}
+
+function passView() {
+  const r = state.round;
+  const seenCount = r.seen.filter(Boolean).length;
+  const all = seenCount === state.players.length;
+  if (all) {
+    return `
+      <header class="stack">
+        <div class="label">Όλοι είδαν</div>
+        <h2>Ώρα για συζήτηση</h2>
+      </header>
+      <div class="card">
+        <p class="muted">Ξεκινάει πρώτος/η</p>
+        <div class="big-name">${esc(state.players[r.starter])}</div>
+        <p class="muted">Ο καθένας λέει μια λέξη που σχετίζεται με τη δική του. Μετά ψηφίζετε.</p>
+      </div>
+      <button class="btn ${ui.armed === "reveal" ? "danger" : "primary"}" data-action="reveal-all">
+        ${ui.armed === "reveal" ? "Σίγουρα; Πάτα ξανά" : "Αποκάλυψη"}
+      </button>
+    `;
+  }
+  return `
+    <header class="stack">
+      <div class="label">Γύρος · ${seenCount}/${state.players.length} είδαν</div>
+      <h2>Πάρε το κινητό και πάτα το όνομά σου</h2>
+    </header>
+    <div class="names">
+      ${state.players.map((p, i) => `
+        <button class="${r.seen[i] ? "seen" : ""}" data-action="open" data-i="${i}" ${r.seen[i] ? "disabled" : ""}>${esc(p)}</button>`).join("")}
+    </div>
+    <div class="spacer"></div>
+    <button class="btn ghost" data-action="cancel">${ui.armed === "cancel" ? "Σίγουρα; Πάτα ξανά για ακύρωση" : "Ακύρωση γύρου"}</button>
+  `;
+}
+
+function revealView() {
+  const r = state.round;
+  const i = ui.current;
+  const name = esc(state.players[i]);
+  if (!ui.revealed) {
+    return `
+      <header class="stack">
+        <div class="label">Μόνο για</div>
+        <div class="big-name">${name}</div>
+      </header>
+      <button class="card cover" data-action="flip" aria-label="Δες τον ρόλο σου">
+        <strong style="font-size:1.2rem">Πάτα για να δεις</strong>
+        <span class="muted">Μην αφήσεις κανέναν να κοιτάει.</span>
+      </button>
+      <button class="btn ghost" data-action="back">Δεν είμαι ο/η ${name}</button>
+    `;
+  }
+  const isImp = r.imposters.includes(i);
+  return `
+    <header class="stack">
+      <div class="label">${name}</div>
+    </header>
+    <div class="card revealed ${isImp ? "imposter" : ""}">
+      ${isImp
+        ? `<p class="label">Ο ρόλος σου</p><div class="word">Είσαι ο απατεώνας</div><p class="muted">Δεν ξέρεις τη λέξη. Άκου τους άλλους και μην σε καταλάβουν.</p>`
+        : `<p class="label">Η λέξη σου</p><div class="word">${esc(r.word)}</div><p class="muted">Κράτα την για σένα.</p>`}
+    </div>
+    <button class="btn primary" data-action="hide">Το είδα, κρύψ' το</button>
+  `;
+}
+
+function endView() {
+  const r = state.round;
+  const imps = r.imposters.map(i => esc(state.players[i])).join(", ");
+  return `
+    <header class="stack">
+      <div class="label">Αποκάλυψη</div>
+      <h2>Τέλος γύρου</h2>
+    </header>
+    <div class="result good"><span class="label">Η λέξη ήταν</span><span class="value">${esc(r.word)}</span></div>
+    <div class="result bad"><span class="label">${r.imposters.length === 1 ? "Απατεώνας" : `Απατεώνες · ${r.imposters.length}`}</span><span class="value">${imps}</span></div>
+    <div class="spacer"></div>
+    <div class="stack">
+      <button class="btn primary" data-action="again">Νέος γύρος</button>
+      <button class="btn" data-action="setup">Αλλαγή παικτών / ρυθμίσεων</button>
+    </div>
+  `;
+}
+
+app.addEventListener("submit", e => {
+  e.preventDefault();
+  const input = document.getElementById("name-input");
+  const name = input.value.trim();
+  if (name && !state.players.some(p => p.toLowerCase() === name.toLowerCase())) {
+    state.players.push(name);
+    save();
+  }
+  ui.focusInput = true;
+  render();
+});
+
+app.addEventListener("click", e => {
+  const el = e.target.closest("[data-action]");
+  if (!el || el.tagName === "FORM") return;
+  const a = el.dataset.action;
+  const i = Number(el.dataset.i);
+  ui.focusInput = false;
+
+  if (a === "remove") { state.players.splice(i, 1); save(); render(); }
+  else if (a === "mode") { state.mode = el.dataset.mode; save(); render(); }
+  else if (a === "step") {
+    const k = state.mode === "fixed" ? "fixed" : "max";
+    state[k] += Number(el.dataset.d); clampSettings(); save(); render();
+  }
+  else if (a === "start" || a === "again") startRound();
+  else if (a === "open") go("reveal", { current: i });
+  else if (a === "flip") {
+    ui.revealed = true;
+    state.round.seen[ui.current] = true;
+    save(); render();
+  }
+  else if (a === "hide" || a === "back") go("pass");
+  else if (a === "cancel") {
+    if (ui.armed === "cancel") { state.round = null; save(); go("setup"); }
+    else { ui.armed = "cancel"; render(); }
+  }
+  else if (a === "reveal-all") {
+    if (ui.armed === "reveal") { state.round.done = true; save(); go("end"); }
+    else { ui.armed = "reveal"; render(); }
+  }
+  else if (a === "setup") { state.round = null; save(); go("setup"); }
+});
+
+render();
+</script>
